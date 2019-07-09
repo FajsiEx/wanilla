@@ -3,6 +3,6 @@ const app = express();
 
 require("./routes").init(app);
 
-app.listen(3211, function () {
+app.listen(process.env.PORT || 3211, function () {
     console.log("Started.");
 });
