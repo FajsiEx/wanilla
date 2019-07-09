@@ -90,6 +90,9 @@ const timelineData = [
 const express = require("express");
 const auth = require('http-auth');
 
+const bridge = require("./bridge");
+bridge.initDB();
+
 let dashSec = auth.basic({ realm: 'dashboard' }, function (username, password, callback) {
     callback(username == 'admin' && password == 'p455w0rd');
 });
@@ -108,8 +111,13 @@ module.exports = {
         app.get("/", function (req, res) {
             res.send("Wanilla API.");
         });
-        app.get("/api/timeline", function (req, res) {
-            res.json(timelineData);
+        app.get("/api/timeline", async function (req, res) {
+            try {
+                let timelineData = await bridge.getTimeline();
+                res.json(timelineData);
+            }catch(e){
+                res.status(500).send(e);
+            }
         });
     }
 };
