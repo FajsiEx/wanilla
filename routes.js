@@ -87,8 +87,12 @@ const timelineData = [
     }
 ];
 
+const express = require("express");
+
 module.exports = {
     init: function (app) {
+        app.use(express.static('public'))
+
         app.get("/", function (req, res) {
             res.send("Wanilla API.");
         });
