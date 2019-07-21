@@ -77,7 +77,7 @@ module.exports = {
 
         let events;
         try {
-            events = await db.collection("timeline").find({}).sort({time: -1}).limit(limitInt).toArray();
+            events = await db.collection("timeline").find({}).sort({ time: -1 }).limit(limitInt).toArray();
         } catch (e) {
             throw ("Could not get docs from collection: " + e);
         }
