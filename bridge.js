@@ -70,14 +70,19 @@ module.exports = {
         }
     },
 
-    getTimeline: async function (limitArg) {
+    getTimeline: async function (limitArg, project) {
         if (dbConnStatus != 1) { throw ("Database error. !DB!"); }
 
         limitInt = limitArg || 10;
 
+        let filter = {}
+        if (project != 'all') {
+            filter = {project_id: project}
+        }
+
         let events;
         try {
-            events = await db.collection("timeline").find({}).sort({ time: -1 }).limit(limitInt).toArray();
+            events = await db.collection("timeline").find(filter).sort({ time: -1 }).limit(limitInt).toArray();
         } catch (e) {
             throw ("Could not get docs from collection: " + e);
         }

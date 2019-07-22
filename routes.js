@@ -10,6 +10,8 @@ let dashSec = auth.basic({ realm: 'dashboard' }, function (username, password, c
 
 let dashAuthMiddleware = auth.connect(dashSec);
 
+const allowedProjects = ["website", "wanilla", "teabotre", "teabot", "noter", "all"];
+
 module.exports = {
     init: function (app) {
         app.use(express.static('public'));
@@ -22,9 +24,16 @@ module.exports = {
         app.get("/", function (req, res) {
             res.send("Wanilla API.");
         });
-        app.get("/api/timeline", async function (req, res) {
+        app.get("/api/timeline/:project", async function (req, res) {
+            let project = req.params.project;
+
+            if (!allowedProjects.includes(project)) {
+                res.status(400).send("Invalid project");
+                return false;
+            }
+
             try {
-                let timelineData = await bridge.getTimeline();
+                let timelineData = await bridge.getTimeline(null,project);
                 res.json(timelineData);
             }catch(e){
                 res.status(500).send(e);
