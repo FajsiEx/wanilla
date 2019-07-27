@@ -88,5 +88,39 @@ module.exports = {
         }
 
         return events;
+    },
+
+    getLatestChangelogs: async function (project) {
+        if (dbConnStatus != 1) throw ("Database error. !DB!");
+        let events;
+
+
+        let alphaChangelog, betaChangelog, stableChangelog;
+
+        // Get alpha changelog
+        try {
+            alphaChangelog = await db.collection("timeline").find({project_id: project, tag: 'alpha', type: "release"}).sort({ time: -1 }).limit(1).toArray();
+        } catch (e) {
+            throw ("Could not get alpha docs from collection: " + e);
+        }
+        // Get beta changelog
+        try {
+            betaChangelog = await db.collection("timeline").find({project_id: project, tag: 'beta', type: "release"}).sort({ time: -1 }).limit(1).toArray();
+        } catch (e) {
+            throw ("Could not get beta doc from collection: " + e);
+        }
+        // Get stable changelog
+        try {
+            stableChangelog = await db.collection("timeline").find({project_id: project, tag: {$exists: false}, type: "release"}).sort({ time: -1 }).limit(1).toArray();
+        } catch (e) {
+            throw ("Could not get stable doc from collection: " + e);
+        }
+
+        return {
+            id: project,
+            alpha: alphaChangelog,
+            beta: betaChangelog,
+            stable: stableChangelog
+        };
     }
 };

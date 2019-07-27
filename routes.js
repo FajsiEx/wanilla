@@ -10,7 +10,14 @@ let dashSec = auth.basic({ realm: 'dashboard' }, function (username, password, c
 
 let dashAuthMiddleware = auth.connect(dashSec);
 
-const allowedProjects = ["website", "wanilla", "teabotre", "teabot", "noter", "all"];
+const allowedProjects = [
+    "website",
+    "wanilla",
+    "teabotre",
+    //"teabot",
+    //"noter",
+    "all"
+];
 
 module.exports = {
     init: function (app) {
@@ -24,6 +31,7 @@ module.exports = {
         app.get("/", function (req, res) {
             res.send("Wanilla API.");
         });
+
         app.get("/api/timeline/:project", async function (req, res) {
             let project = req.params.project;
 
@@ -38,6 +46,49 @@ module.exports = {
             }catch(e){
                 res.status(500).send(e);
             }
+        });
+
+        app.get("/api/build_numbers/:project", async function (req, res) {
+            let _project = req.params.project;
+
+            if (!allowedProjects.includes(_project)) {
+                res.status(400).send("Invalid project");
+                return false;
+            }
+            
+            let projects = [];
+
+            if (_project == 'all') {
+                for (const projectName of allowedProjects) {
+                    if (projectName == 'all') continue;
+
+                    try {
+                        projects.push(await bridge.getLatestChangelogs(projectName));
+                    }catch(e){
+                        res.status(500).send(e);
+                        console.log(e);
+                        return false;
+                    }
+                }
+            }
+
+            for (let project of projects) {
+                if (project.alpha.length < 1) {project.alpha = false;}
+                if (project.beta.length < 1) {project.beta = false;}
+                if (project.stable.length < 1) {project.stable = false;}
+
+                if (project.alpha) {
+                    project.alpha = project.alpha[0].build + " alpha";
+                }
+                if (project.beta) {
+                    project.beta = project.beta[0].build + " beta";
+                }
+                if (project.stable) {
+                    project.stable = project.stable[0].build;
+                }
+            }
+
+            res.json(projects);
         });
     }
 };
