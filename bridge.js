@@ -70,14 +70,17 @@ module.exports = {
         }
     },
 
-    getTimeline: async function (limitArg, project) {
+    getTimeline: async function (limitArg, project, type) {
         if (dbConnStatus != 1) { throw ("Database error. !DB!"); }
 
         limitInt = limitArg || 10;
 
         let filter = {}
         if (project != 'all') {
-            filter = {project_id: project}
+            filter.project_id = project;
+        }
+        if (type != 'all') {
+            filter.type = type;
         }
 
         let events;

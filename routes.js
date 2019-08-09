@@ -18,6 +18,12 @@ const allowedProjects = [
     //"noter",
     "all"
 ];
+const allowedTypes = [
+    "all",
+    "post",
+    "release",
+    "issue",
+];
 
 module.exports = {
     init: function (app) {
@@ -32,16 +38,21 @@ module.exports = {
             res.send("Wanilla API.");
         });
 
-        app.get("/api/timeline/:project", async function (req, res) {
-            let project = req.params.project;
+        app.get("/api/timeline/:project/:type", async function (req, res) {
+            const project = req.params.project;
+            const type = req.params.type;
 
             if (!allowedProjects.includes(project)) {
                 res.status(400).send("Invalid project");
                 return false;
             }
+            if (!allowedTypes.includes(type)) {
+                res.status(400).send("Invalid type");
+                return false;
+            }
 
             try {
-                let timelineData = await bridge.getTimeline(null,project);
+                let timelineData = await bridge.getTimeline(null,project,type);
                 res.json(timelineData);
             }catch(e){
                 res.status(500).send(e);
