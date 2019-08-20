@@ -14,8 +14,9 @@ const allowedProjects = [
     "website",
     "wanilla",
     "teabotre",
+    "ama",
     //"teabot",
-    //"noter",
+    "noter",
     "all"
 ];
 const allowedTypes = [
