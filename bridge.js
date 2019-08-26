@@ -70,60 +70,63 @@ module.exports = {
         }
     },
 
-    getTimeline: async function (limitArg, project, type) {
-        if (dbConnStatus != 1) { throw ("Database error. !DB!"); }
+    web: {
 
-        limitInt = limitArg || 10;
+        getTimeline: async function (limitArg, project, type) {
+            if (dbConnStatus != 1) { throw ("Database error. !DB!"); }
 
-        let filter = {}
-        if (project != 'all') {
-            filter.project_id = project;
+            limitInt = limitArg || 10;
+
+            let filter = {}
+            if (project != 'all') {
+                filter.project_id = project;
+            }
+            if (type != 'all') {
+                filter.type = type;
+            }
+
+            let events;
+            try {
+                events = await db.collection("timeline").find(filter).sort({ time: -1 }).limit(limitInt).toArray();
+            } catch (e) {
+                throw ("Could not get docs from collection: " + e);
+            }
+
+            return events;
+        },
+
+        getLatestChangelogs: async function (project) {
+            if (dbConnStatus != 1) throw ("Database error. !DB!");
+            let events;
+
+
+            let alphaChangelog, betaChangelog, stableChangelog;
+
+            // Get alpha changelog
+            try {
+                alphaChangelog = await db.collection("timeline").find({ project_id: project, tag: 'alpha', type: "release" }).sort({ time: -1 }).limit(1).toArray();
+            } catch (e) {
+                throw ("Could not get alpha docs from collection: " + e);
+            }
+            // Get beta changelog
+            try {
+                betaChangelog = await db.collection("timeline").find({ project_id: project, tag: 'beta', type: "release" }).sort({ time: -1 }).limit(1).toArray();
+            } catch (e) {
+                throw ("Could not get beta doc from collection: " + e);
+            }
+            // Get stable changelog
+            try {
+                stableChangelog = await db.collection("timeline").find({ project_id: project, tag: { $exists: false }, type: "release" }).sort({ time: -1 }).limit(1).toArray();
+            } catch (e) {
+                throw ("Could not get stable doc from collection: " + e);
+            }
+
+            return {
+                id: project,
+                alpha: alphaChangelog,
+                beta: betaChangelog,
+                stable: stableChangelog
+            };
         }
-        if (type != 'all') {
-            filter.type = type;
-        }
-
-        let events;
-        try {
-            events = await db.collection("timeline").find(filter).sort({ time: -1 }).limit(limitInt).toArray();
-        } catch (e) {
-            throw ("Could not get docs from collection: " + e);
-        }
-
-        return events;
-    },
-
-    getLatestChangelogs: async function (project) {
-        if (dbConnStatus != 1) throw ("Database error. !DB!");
-        let events;
-
-
-        let alphaChangelog, betaChangelog, stableChangelog;
-
-        // Get alpha changelog
-        try {
-            alphaChangelog = await db.collection("timeline").find({project_id: project, tag: 'alpha', type: "release"}).sort({ time: -1 }).limit(1).toArray();
-        } catch (e) {
-            throw ("Could not get alpha docs from collection: " + e);
-        }
-        // Get beta changelog
-        try {
-            betaChangelog = await db.collection("timeline").find({project_id: project, tag: 'beta', type: "release"}).sort({ time: -1 }).limit(1).toArray();
-        } catch (e) {
-            throw ("Could not get beta doc from collection: " + e);
-        }
-        // Get stable changelog
-        try {
-            stableChangelog = await db.collection("timeline").find({project_id: project, tag: {$exists: false}, type: "release"}).sort({ time: -1 }).limit(1).toArray();
-        } catch (e) {
-            throw ("Could not get stable doc from collection: " + e);
-        }
-
-        return {
-            id: project,
-            alpha: alphaChangelog,
-            beta: betaChangelog,
-            stable: stableChangelog
-        };
     }
 };

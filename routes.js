@@ -53,7 +53,7 @@ module.exports = {
             }
 
             try {
-                let timelineData = await bridge.getTimeline(null,project,type);
+                let timelineData = await bridge.web.getTimeline(null,project,type);
                 res.json(timelineData);
             }catch(e){
                 res.status(500).send(e);
@@ -75,7 +75,7 @@ module.exports = {
                     if (projectName == 'all') continue;
 
                     try {
-                        projects.push(await bridge.getLatestChangelogs(projectName));
+                        projects.push(await bridge.web.getLatestChangelogs(projectName));
                     }catch(e){
                         res.status(500).send(e);
                         console.log(e);
