@@ -75,7 +75,7 @@ module.exports = {
                     if (projectName == 'all') continue;
 
                     try {
-                        projects.push(await bridge.web.getLatestChangelogs(projectName));
+                        projects.push(await bridge.web.getProjectDetails(projectName));
                     }catch(e){
                         res.status(500).send(e);
                         console.log(e);

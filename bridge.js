@@ -95,13 +95,14 @@ module.exports = {
             return events;
         },
 
-        getLatestChangelogs: async function (project) {
+        getProjectDetails: async function (project) {
             if (dbConnStatus != 1) throw ("Database error. !DB!");
             let events;
 
 
             let alphaChangelog, betaChangelog, stableChangelog;
 
+            
             // Get alpha changelog
             try {
                 alphaChangelog = await db.collection("timeline").find({ project_id: project, tag: 'alpha', type: "release" }).sort({ time: -1 }).limit(1).toArray();
@@ -121,8 +122,13 @@ module.exports = {
                 throw ("Could not get stable doc from collection: " + e);
             }
 
+            const allChangelogs = await db.collection("timeline").find({ project_id: project, type: "release" }).toArray();
+
+            const releasesNumber = allChangelogs.length;
+
             return {
                 id: project,
+                releases: releasesNumber,
                 alpha: alphaChangelog,
                 beta: betaChangelog,
                 stable: stableChangelog
